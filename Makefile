@@ -72,7 +72,7 @@ endif
 
 .PHONY: all clean make_dirs interfaces clean_interfaces debug run release release_run docs copyright help
 
-all: debug
+all: help
 
 debug:
 	@$(MAKE) TYPE=debug $(EXE)
@@ -115,13 +115,10 @@ docs:
 	@doxygen
 
 copyright:
-	@if [ -f LICENSE.md ]; then \
-		for file in $(SOURCES_C) $(SOURCES_CPP) $(wildcard ./src/**/*.h) $(wildcard ./src/**/*.hpp) main.hpp shared.hpp; do \
-			echo "/*" >> $$file; \
-			cat LICENSE.md >> $$file; \
-			echo "*/" >> $$file; \
-		done \
-	fi
+	@./scripts/add_copyright.sh
+
+clean_copyright:
+	@./scripts/remove_copyright.sh
 
 help:
 	@echo "Possible commands:"
@@ -135,6 +132,7 @@ help:
 	@echo "  make release_run: make release and run the created executable"
 	@echo "  make docs:        generate the documentation for the project"
 	@echo "  make copyright:   append license to source files"
+	@echo "  make clean_copyright: remove license from source files"
 	@echo "  make help:        print all possible commands"
 
 # Order-only prerequisites

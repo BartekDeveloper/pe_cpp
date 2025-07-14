@@ -1,6 +1,7 @@
-#include "../../shared.hpp"
+#include "engine.hpp"
 
 int Engine(void* self) {
 
     return *(int*)self;
 }
+

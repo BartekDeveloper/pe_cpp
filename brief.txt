@@ -20,6 +20,7 @@ make interfaces: generate the interface files for the project, if any(
     .h files will be copied to ./src/interfaces,
     from ./src/** where .h file == dirname
 )
+make clean_copyright: remove all copyright comments from the source files
 make clean_interfaces: remove all .h files from ./src/interfaces
 make debug:       make_dirs and make interfaces and compile the project in debug mode
 make run:         make debug and run the created executable(if compiled successfully)
@@ -45,6 +46,7 @@ brief.txt:  brief description of the project
 ./compiled:          directory containing all the compiled files
 ./docs:              directory containing the documentation
 ./out:               directory containing the executables
+./scripts:           directory containing all the scripts
 ./src:               directory containing all the source and header files
 ./src/interfaces:    directory containing all the interface files
 ./external:          directory containing all the external libraries
