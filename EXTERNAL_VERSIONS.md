@@ -1,0 +1,4 @@
+# VERSIONS OF EXTERNAL LIBRARIES
+
+- `SDL3`:       `main:a07cf3e`
+- `VULKAN_SDK`: `1.4.313.0`
