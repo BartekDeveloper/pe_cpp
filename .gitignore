@@ -1,4 +1,1 @@
-# Ignore compiled .o files
-./compiled/*
-*.o
-
+./external/**
