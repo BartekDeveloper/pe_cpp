@@ -9,7 +9,7 @@ LD     = ld
 NASM   = nasm
 
 # Executable
-EXE_NAME ?= main
+EXE_NAME ?= pe
 TYPE     ?= debug
 
 # Directories
@@ -52,10 +52,12 @@ C_STD       = -std=c99
 CXX_STD     = -std=c++17
 DEBUG_FLAGS = -g -O0
 RELEASE_FLAGS = -O3
-CFLAGS      = $(C_STD) -I$(INCLUDE_DIR) -I./src/interfaces
-CXXFLAGS    = $(CXX_STD) -I$(INCLUDE_DIR) -I./src/interfaces
-LDFLAGS     = -L$(STATIC_DIR) -L$(DYNAMIC_DIR)
-CPPFLAGS    = -DMAIN_PROJECT_VERSION=\"1.0.0\" -DMAIN_PROJECT_NAME=\"$(EXE_NAME)\" -DMAIN_PROJECT_AUTHOR=\"Zota\"
+CFLAGS      = $(C_STD) -I$(INCLUDE_DIR) -I./interfaces
+CXXFLAGS    = $(CXX_STD) -I$(INCLUDE_DIR) -I./interfaces
+STATIC_LIBS = $(wildcard $(STATIC_DIR)/*.a*)
+DYNAMIC_LIBS = $(wildcard $(DYNAMIC_DIR)/*.so*)
+LDFLAGS     = -L$(STATIC_DIR) -L$(DYNAMIC_DIR) $(patsubst $(STATIC_DIR)/lib%.a,-l%,$(STATIC_LIBS)) $(patsubst $(DYNAMIC_DIR)/lib%.so,-l%,$(DYNAMIC_LIBS))
+CPPFLAGS    = -DMAIN_PROJECT_VERSION=\"1.0.0\" -DMAIN_PROJECT_NAME=\"$(EXE_NAME)\" -DMAIN_PROJECT_AUTHOR=\"Zota0\"
 
 # Set flags based on TYPE
 ifeq ($(TYPE),debug)
@@ -99,16 +101,16 @@ $(OBJ_DIR)/%.o: %.s | $(OBJ_DIR)
 	$(NASM) -f elf64 $< -o $@
 
 make_dirs:
-	@mkdir -p $(OBJ_DIR) ./out/debug ./out/release $(DOCS_DIR) ./src/interfaces
+	@mkdir -p $(OBJ_DIR) ./out/debug ./out/release $(DOCS_DIR) ./interfaces
 
 clean:
 	@rm -rf $(OBJ_DIR)/* ./out/debug/* ./out/release/*
 
 interfaces:
-	@find ./src -type f -name "*.h" -exec cp {} ./src/interfaces \;
+	@./scripts/make_interfaces.sh
 
 clean_interfaces:
-	@rm -rf ./src/interfaces/*
+	@rm -rf ./interfaces/*
 
 docs:
 	@doxygen -g
@@ -125,7 +127,7 @@ help:
 	@echo "  make clean:      remove all .o files from ./compiled and ./out/{TYPE}"
 	@echo "  make make_dirs:  create the ./compiled and ./out/{TYPE} directories and ./docs"
 	@echo "  make interfaces: generate the interface files for the project"
-	@echo "  make clean_interfaces: remove all .h files from ./src/interfaces"
+	@echo "  make clean_interfaces: remove all .h files from ./interfaces"
 	@echo "  make debug:       compile the project in debug mode"
 	@echo "  make run:         make debug and run the created executable"
 	@echo "  make release:     compile the project in release mode"
