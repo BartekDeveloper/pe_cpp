@@ -3,6 +3,8 @@
 #ifndef ENGINE_HPP
 #define ENGINE_HPP
 
+#include "../shared.hpp"
+
 int Engine(void* self);
 
 #endif // ENGINE_HPP

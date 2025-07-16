@@ -2,7 +2,8 @@
 #ifndef MAIN_HPP
 #define MAIN_HPP
 
-#include "shared.hpp"
+#include "src/shared.hpp"
+
 
 
 #endif // MAIN_HPP

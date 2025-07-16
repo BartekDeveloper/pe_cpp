@@ -26,7 +26,7 @@ EXE = $(OUT_DIR)/$(EXE_NAME)
 
 # Find source files
 SOURCES_C   = $(wildcard $(SRC_DIRS)/**/*.c)
-SOURCES_CPP = $(wildcard $(SRC_DIRS)/**/*.cpp)
+SOURCES_CPP = $(wildcard $(SRC_DIRS)/**/*.cpp) $(wildcard $(SRC_DIRS)/**/*.cc)
 SOURCES_ASM = $(wildcard $(SRC_DIRS)/**/*.s)
 
 # Check for main.c or main.cpp and set linker
@@ -48,16 +48,15 @@ OBJECTS     = $(OBJECTS_C) $(OBJECTS_CPP) $(OBJECTS_ASM)
 VPATH = $(sort $(dir $(SOURCES_C) $(SOURCES_CPP) $(SOURCES_ASM)))
 
 # Compiler flags
-C_STD       = -std=c99
-CXX_STD     = -std=c++17
-DEBUG_FLAGS = -g -O0
+C_STD         = -std=c23
+CXX_STD       = -std=c++23
+DEBUG_FLAGS   = -g -O0
 RELEASE_FLAGS = -O3
-CFLAGS      = $(C_STD) -I$(INCLUDE_DIR) -I./interfaces
-CXXFLAGS    = $(CXX_STD) -I$(INCLUDE_DIR) -I./interfaces
-STATIC_LIBS = $(wildcard $(STATIC_DIR)/*.a*)
-DYNAMIC_LIBS = $(wildcard $(DYNAMIC_DIR)/*.so*)
-LDFLAGS     = -L$(STATIC_DIR) -L$(DYNAMIC_DIR) $(patsubst $(STATIC_DIR)/lib%.a,-l%,$(STATIC_LIBS)) $(patsubst $(DYNAMIC_DIR)/lib%.so,-l%,$(DYNAMIC_LIBS))
-CPPFLAGS    = -DMAIN_PROJECT_VERSION=\"1.0.0\" -DMAIN_PROJECT_NAME=\"$(EXE_NAME)\" -DMAIN_PROJECT_AUTHOR=\"Zota0\"
+CFLAGS        = $(C_STD) -I$(INCLUDE_DIR)
+CXXFLAGS      = $(CXX_STD) -I$(INCLUDE_DIR)
+STATIC_LIBS   = $(wildcard $(STATIC_DIR)/*.a*)
+DYNAMIC_LIBS  = $(wildcard $(DYNAMIC_DIR)/*.so*)
+LDFLAGS       = -L$(STATIC_DIR) -L$(DYNAMIC_DIR) $(patsubst $(STATIC_DIR)/lib%.a,-l%,$(STATIC_LIBS)) $(patsubst $(DYNAMIC_DIR)/lib%.so,-l%,$(DYNAMIC_LIBS))
 
 # Set flags based on TYPE
 ifeq ($(TYPE),debug)
@@ -72,7 +71,7 @@ endif
 #      RULES        #
 # ----------------- #
 
-.PHONY: all clean make_dirs interfaces clean_interfaces debug run release release_run docs copyright help
+.PHONY: all clean make_dirs interfaces clean_interfaces debug run release release_run docs copyright help gdb
 
 all: help
 
@@ -88,14 +87,17 @@ run: debug
 release_run: release
 	@./$(EXE)
 
+gdb: debug
+	@gdb -ex 'run' ./$(EXE)
+
 $(EXE): $(OBJECTS) | $(OUT_DIR)
-	$(LINKER_CMD) $(CXXFLAGS) $(CPPFLAGS) $^ -o $@ $(LDFLAGS)
+	$(LINKER_CMD) $(CXXFLAGS) $^ -o $@ $(LDFLAGS)
 
 $(OBJ_DIR)/%.o: %.c | $(OBJ_DIR)
-	$(GCC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
+	$(GCC) $(CFLAGS) -c $< -o $@
 
 $(OBJ_DIR)/%.o: %.cpp | $(OBJ_DIR)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(OBJ_DIR)/%.o: %.s | $(OBJ_DIR)
 	$(NASM) -f elf64 $< -o $@
@@ -113,7 +115,6 @@ clean_interfaces:
 	@rm -rf ./interfaces/*
 
 docs:
-	@doxygen -g
 	@doxygen
 
 copyright:
@@ -136,6 +137,7 @@ help:
 	@echo "  make copyright:   append license to source files"
 	@echo "  make clean_copyright: remove license from source files"
 	@echo "  make help:        print all possible commands"
+	@echo "  make gdb:         compile the project in debug mode, launch gdb and immediately run the program."
 
 # Order-only prerequisites
 $(OBJ_DIR):
