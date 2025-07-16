@@ -1,68 +1,51 @@
-#/bin/bash
+#!/bin/bash
 
-# This script will generate an interface file for this project
-# It will scan ./src/** and for every directory that contains a .h or .hpp file
-# with same name as the directory, it will generate an interface file
-# in ./src/interfaces as {DIRNAME}_interface.h or {DIRNAME}_interface.hpp
+# Exit immediately if a command exits with a non-zero status.
+set -e
 
+# Get the current script's directory.
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-# Get the current directory
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+# Get the parent directory, which we'll consider the project root.
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
-# Get the parent directory
-PARENT_DIR="$(dirname "$DIR")"
+# Define the source directory for modules.
+SRC_DIR="$PROJECT_ROOT/src"
 
-# Get the project name
-PROJECT_NAME="$(basename "$PARENT_DIR")"
+# Define the destination directory for interface files.
+INTERFACES_DIR="$PROJECT_ROOT/interfaces"
 
-# Get the list of directories in src
-DIRS=$(find "$PARENT_DIR/src" -maxdepth 1 -type d)
+# Create the interfaces directory if it doesn't exist.
+# The -p flag prevents errors if the directory already exists.
+mkdir -p "$INTERFACES_DIR"
 
-# Loop through the directories
-for DIR in $DIRS; do
-    # Get the directory name
-    DIR_NAME=$(basename "$DIR")
-
-    if [ -f "$DIR/$DIR_NAME.h" ]; then
-        # Inside ./src/interfaces create a file with the same name as the directory + _interface.h
-        echo "Generating interface file for $DIR_NAME"
-        echo "#pragma once" > "$DIR/$DIR_NAME"_interface.h
-        echo "#ifndef $DIR_NAME"_INTERFACE_H >> "$DIR/$DIR_NAME"_interface.h
-        echo "#define $DIR_NAME"_INTERFACE_H >> "$DIR/$DIR_NAME"_interface.h
-        echo "" >> "$DIR/$DIR_NAME"_interface.h
-
-        # Copy the content of the .h file to the interface file (after 5th line)
-        tail -n +5 "$DIR/$DIR_NAME".h >> "$DIR/$DIR_NAME"_interface.h
-        echo "" >> "$DIR/$DIR_NAME"_interface.h
-
-        # Check if file contains "#endif" at the end of file
-        if ! tail -n 10 "$DIR/$DIR_NAME".h | grep -F "#endif"; then
-            echo "#endif // $DIR_NAME"_INTERFACE_H >> "$DIR/$DIR_NAME"_interface.h
-            echo "" >> "$DIR/$DIR_NAME"_interface.h
-        fi
-        
-        mv "$DIR/$DIR_NAME"_interface.h "./interfaces/$DIR_NAME"_interface.h
+# Find directories in src and loop through them safely.
+# -print0 ensures names with spaces are handled correctly.
+# The while loop reads null-terminated strings.
+find "$SRC_DIR" -maxdepth 1 -type d -print0 | while IFS= read -r -d $'\0' current_module_dir; do
+    # Skip the base 'src' directory itself if 'find' includes it.
+    if [ "$current_module_dir" = "$SRC_DIR" ]; then
+        continue
     fi
 
-    if [ -f "$DIR/$DIR_NAME.hpp" ]; then
-        # Inside ./src/interfaces create a file with the same name as the directory + _interface.hpp
-        echo "Generating interface file for $DIR_NAME"
-        echo "#pragma once" > "$DIR/$DIR_NAME"_interface.hpp
-        echo "#ifndef $DIR_NAME"_INTERFACE_HPP >> "$DIR/$DIR_NAME"_interface.hpp
-        echo "#define $DIR_NAME"_INTERFACE_HPP >> "$DIR/$DIR_NAME"_interface.hpp
-        echo "" >> "$DIR/$DIR_NAME"_interface.hpp
-        
-        # Copy the content of the .hpp file to the interface file (after 5th line)
-        tail -n +5 "$DIR/$DIR_NAME".hpp >> "$DIR/$DIR_NAME"_interface.hpp
-        echo "" >> "$DIR/$DIR_NAME"_interface.hpp
+    # Get the base name of the current directory (e.g., "moduleA").
+    MODULE_NAME=$(basename "$current_module_dir")
 
-        # Check if file contains "#endif" at the end of file
-        if ! tail -n 10 "$DIR/$DIR_NAME".hpp | grep -F "#endif"; then
-            echo "#endif // $DIR_NAME"_INTERFACE_HPP >> "$DIR/$DIR_NAME"_interface.hpp
-            echo "" >> "$DIR/$DIR_NAME"_interface.hpp
-        fi
+    # Define the full paths to the potential interface files.
+    H_INTERFACE_FILE="${current_module_dir}/${MODULE_NAME}_interface.h"
+    HPP_INTERFACE_FILE="${current_module_dir}/${MODULE_NAME}_interface.hpp"
 
-        
-        mv "$DIR/$DIR_NAME"_interface.hpp "./interfaces/$DIR_NAME"_interface.hpp
+    # Check if the .h interface file exists and copy it.
+    if [ -f "$H_INTERFACE_FILE" ]; then
+        echo "Copying $H_INTERFACE_FILE to $INTERFACES_DIR/"
+        cp "$H_INTERFACE_FILE" "$INTERFACES_DIR/"
+    fi
+
+    # Check if the .hpp interface file exists and copy it.
+    if [ -f "$HPP_INTERFACE_FILE" ]; then
+        echo "Copying $HPP_INTERFACE_FILE to $INTERFACES_DIR/"
+        cp "$HPP_INTERFACE_FILE" "$INTERFACES_DIR/"
     fi
 done
+
+echo "All relevant interface files have been copied to $INTERFACES_DIR."
