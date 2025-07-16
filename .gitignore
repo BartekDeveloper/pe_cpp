@@ -1,4 +1,6 @@
-./external/**
-./interfaces/**
-external/**
+external/static/**
+external/dynamic/**
+external/include/**
+compiled/**
 interfaces/**
+docs/**
