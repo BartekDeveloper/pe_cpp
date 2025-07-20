@@ -3,10 +3,10 @@
 # ----------------- #
 
 # Programs
-GCC    = gcc
-CXX    = g++
-LD     = ld
-NASM   = nasm
+GCC  = gcc
+CXX  = g++
+LD   = ld
+NASM = nasm
 
 # Executable
 EXE_NAME ?= pe
@@ -53,7 +53,7 @@ CXX_STD       = -std=c++23
 DEBUG_FLAGS   = -g -O0
 RELEASE_FLAGS = -O3
 CFLAGS        = $(C_STD) -I$(INCLUDE_DIR)
-CXXFLAGS      = $(CXX_STD) -I$(INCLUDE_DIR)
+CXXFLAGS      = $(CXX_STD) -I$(INCLUDE_DIR) -fconstexpr-ops-limit=335544321
 STATIC_LIBS   = $(wildcard $(STATIC_DIR)/*.a*)
 DYNAMIC_LIBS  = $(wildcard $(DYNAMIC_DIR)/*.so*)
 LDFLAGS       = -L$(STATIC_DIR) -L$(DYNAMIC_DIR) $(patsubst $(STATIC_DIR)/lib%.a,-l%,$(STATIC_LIBS)) $(patsubst $(DYNAMIC_DIR)/lib%.so,-l%,$(DYNAMIC_LIBS))
