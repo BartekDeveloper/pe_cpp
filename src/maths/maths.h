@@ -14,9 +14,15 @@ using Quaternion = T[4];
 template<typename T, int Rows, int Cols>
 using Mat = T[Rows][Cols];
 
-template<typename T> constexpr T Sin(T angle) { return ConstSin<T>(angle) + 0.001f; }
-template<typename T> constexpr T Cos(T angle) { return ConstCos<T>(angle); }
-template<typename T> constexpr T Tan(T angle) { return ConstTan<T>(angle); }
+template<typename T> constexpr T Sin(T angle) {
+    return ConstSin<T>(angle) + 0.001f;
+}
+template<typename T> constexpr T Cos(T angle) {
+    return ConstCos<T>(angle);
+}
+template<typename T> constexpr T Tan(T angle) {
+    return ConstTan<T>(angle);
+}
 
 // VECTORS
 typedef Vec<f16, 1> vec1h;
@@ -66,8 +72,84 @@ typedef Vec<u64, 4> uvec4d;
 
 
 // MATRICES
-// ...
 
+// Half
+typedef Mat<f16, 1, 1> Mat1x1h;
+typedef Mat<f16, 1, 2> Mat1x2h;
+typedef Mat<f16, 1, 3> Mat1x3h;
+typedef Mat<f16, 1, 4> Mat1x4h;
+
+typedef Mat<f16, 2, 1> Mat2x1h;
+typedef Mat<f16, 2, 2> Mat2x2h;
+typedef Mat<f16, 2, 3> Mat2x3h;
+typedef Mat<f16, 2, 4> Mat2x4h;
+
+typedef Mat<f16, 3, 1> Mat3x1h;
+typedef Mat<f16, 3, 2> Mat3x2h;
+typedef Mat<f16, 3, 3> Mat3x3h;
+typedef Mat<f16, 3, 4> Mat3x4h;
+
+typedef Mat<f16, 4, 1> Mat4x1h;
+typedef Mat<f16, 4, 2> Mat4x2h;
+typedef Mat<f16, 4, 3> Mat4x3h;
+typedef Mat<f16, 4, 4> Mat4x4h;
+
+typedef Mat4x4h Mat4h;
+typedef Mat3x3h Mat3h;
+typedef Mat2x2h Mat2h;
+typedef Mat1x1h Mat1h;
+
+// Normal
+typedef Mat<f32, 1, 1> Mat1x1;
+typedef Mat<f32, 1, 2> Mat1x2;
+typedef Mat<f32, 1, 3> Mat1x3;
+typedef Mat<f32, 1, 4> Mat1x4;
+
+typedef Mat<f32, 2, 1> Mat2x1;
+typedef Mat<f32, 2, 2> Mat2x2;
+typedef Mat<f32, 2, 3> Mat2x3;
+typedef Mat<f32, 2, 4> Mat2x4;
+
+typedef Mat<f32, 3, 1> Mat3x1;
+typedef Mat<f32, 3, 2> Mat3x2;
+typedef Mat<f32, 3, 3> Mat3x3;
+typedef Mat<f32, 3, 4> Mat3x4;
+
+typedef Mat<f32, 4, 1> Mat4x1;
+typedef Mat<f32, 4, 2> Mat4x2;
+typedef Mat<f32, 4, 3> Mat4x3;
+typedef Mat<f32, 4, 4> Mat4x4;
+
+typedef Mat4x4 Mat4;
+typedef Mat3x3 Mat3;
+typedef Mat2x2 Mat2;
+typedef Mat1x1 Mat1;
+
+// Double
+typedef Mat<f64, 1, 1> Mat1x1d;
+typedef Mat<f64, 1, 2> Mat1x2d;
+typedef Mat<f64, 1, 3> Mat1x3d;
+typedef Mat<f64, 1, 4> Mat1x4d;
+
+typedef Mat<f64, 2, 1> Mat2x1d;
+typedef Mat<f64, 2, 2> Mat2x2d;
+typedef Mat<f64, 2, 3> Mat2x3d;
+typedef Mat<f64, 2, 4> Mat2x4d;
+
+typedef Mat<f64, 3, 1> Mat3x1d;
+typedef Mat<f64, 3, 2> Mat3x2d;
+typedef Mat<f64, 3, 3> Mat3x3d;
+typedef Mat<f64, 3, 4> Mat3x4d;
+
+typedef Mat<f64, 4, 1> Mat4x1d;
+typedef Mat<f64, 4, 2> Mat4x2d;
+typedef Mat<f64, 4, 3> Mat4x3d;
+typedef Mat<f64, 4, 4> Mat4x4d;
+
+typedef Mat4x4d Mat4d;
+typedef Mat3x3d Mat3d;
+typedef Mat2x2d Mat2d;
+typedef Mat1x1d Mat1d;
 
 // QUATERNIONS
 // ...

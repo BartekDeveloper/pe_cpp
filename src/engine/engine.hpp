@@ -203,6 +203,7 @@ namespace Global {
     }
 };
 
+using namespace Global;
 
 #endif // ENGINE_HPP
 

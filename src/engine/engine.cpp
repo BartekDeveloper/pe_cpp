@@ -1,7 +1,5 @@
 #include "engine.hpp"
 
-using namespace Global;
-
 unique_ptr<Window>         window;
 unique_ptr<VulkanRenderer> renderer;
 
@@ -12,34 +10,34 @@ VkData     vkData{};
 
 void Global::Init() {
     LOG("Engine::Init()");
-    
+
     LOG("Creating Window");
     window = make_unique<Window>();
     window->Create();
-    
+
     LOG("Creating Vulkan Renderer");
     renderer = make_unique<VulkanRenderer>();
     renderer->Init(&vkData);
-    
+
     LOG("Engine::Init() done");
 }
 
 void Global::NextFrame(RenderData* rData) {
     // ...
-    
+
     rData->currentFrame++;
     rData-> currentFrame %= RenderData::MAX_FRAMES_IN_FLIGHT;
 }
 
 void Global::Clean() {
     LOG("Engine::Clean()");
-    
+
     LOG("Destroying Window");
     window->Destroy();
-    
+
     LOG("Destroying Vulkan Renderer");
     renderer->Clean(&vkData);
-    
+
     LOG("Engine::Clean() done");
 }
 
@@ -55,40 +53,40 @@ Window::Window() {
         LOGF("SDL_Init() failed: %s", SDL_GetError());
         RUNTIME_ERROR("SDL_Init() failed");
     }
-    
+
     LOG("Window::Window() done");
 }
 
 void Window::Create() {
     LOG("Window::Create()");
-    
+
     this->ptr = SDL_CreateWindow(
-        this->title,
-        static_cast<int>(this->width),
-        static_cast<int>(this->height),
-        SDL_WINDOW_VULKAN
-    );
+                    this->title,
+                    static_cast<int>(this->width),
+                    static_cast<int>(this->height),
+                    SDL_WINDOW_VULKAN
+                );
     if(this->ptr == nil) {
         LOGF("SDL_CreateWindow() failed: %s", SDL_GetError());
         RUNTIME_ERROR("SDL_CreateWindow() failed");
     }
-    
+
     LOG("Window::Create() done");
 }
 
 VkResult Window::CreateSurface(VkData* vulkan_data) {
     LOG("Window::CreateSurface()");
-    
+
     bool ok = SDL_Vulkan_CreateSurface(
-        this->ptr,
-        vulkan_data->instance.self,
-        vulkan_data->allocator,
-        &vulkan_data->surface
-    );
+                  this->ptr,
+                  vulkan_data->instance.self,
+                  vulkan_data->allocator,
+                  &vulkan_data->surface
+              );
     if(!ok) {
         return VK_ERROR_INITIALIZATION_FAILED;
     }
-    
+
     return VK_SUCCESS;
 }
 
@@ -99,16 +97,16 @@ void Window::DestroySurface(VkData* vulkan_data) {
         vulkan_data->surface,
         vulkan_data->allocator
     );
-    
+
     LOG("Window::DestroySurface() done");
 }
 
 void Window::Destroy() {
     LOG("Window::Destroy()");
-    
+
     SDL_DestroyWindow(this->ptr);
     this->ptr = nil;
-    
+
     LOG("Window::Destroy() done");
 }
 
@@ -123,14 +121,14 @@ void Window::GetSize(int* width, int* height) {
 Window::~Window() {
     LOG("Window::~Window()");
     SDL_Quit();
-    
+
     LOG("Window::~Window() done");
 }
 
 void VulkanRenderer::Init(VkData* vulkan_data) {
     LOG("VulkanRenderer::Init()");
-    
-    
+
+
     LOG("Application Info");
     vulkan_data->appInfo = {
         .sType              = VK_STRUCTURE_TYPE_APPLICATION_INFO,
@@ -140,8 +138,8 @@ void VulkanRenderer::Init(VkData* vulkan_data) {
         .engineVersion      = VK_MAKE_VERSION(1, 0, 0),
         .apiVersion         = VK_API_VERSION_1_3,
     };
-    
-    
+
+
     IFDEBUG {
         LOG("Debug Messenger Info");
         vulkan_data->debugMessenger.info = {
@@ -154,21 +152,21 @@ void VulkanRenderer::Init(VkData* vulkan_data) {
             .pUserData       = nil,
         };
     }
-    
-    
+
+
     LOG("Instance Extensions");
     u32 extensionCount   = 0;
     vector<cstr> extensions = {};
-    
+
     SDL_Vulkan_GetInstanceExtensions(&extensionCount);
     extensions.reserve(extensionCount + 2);
-    
+
     auto windowExtensions =  SDL_Vulkan_GetInstanceExtensions(&extensionCount);
     for(u32 i = 0; i < extensionCount; i++) {
         UniqueAppend(extensions, windowExtensions[i]);
     }
     UniqueAppend(extensions, VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-    
+
     // Pretty Print
     LOGF("\tNumber of extensions: %d\n", u32(extensions.size()));
     LOG("|~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~|");
@@ -180,21 +178,21 @@ void VulkanRenderer::Init(VkData* vulkan_data) {
     LOG("|~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~|");
     LOG("|>                               <|");
     LOG("|~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~|");
-    
+
     // Moving extensions ownership to struct
     vulkan_data->instance.extensions = std::move(extensions);
-    
-    
+
+
     IFDEBUG {
         LOG("Validation Layers");
         u32 layerCount   = 0;
         vector<cstr> layers = {};
-        
+
         layers = {
             "VK_LAYER_KHRONOS_validation",
         };
         layerCount = layers.size();
-        
+
         // Pretty Print
         LOGF("\tNumber of layers: %d\n", u32(layers.size()));
         LOG("|~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~|");
@@ -206,11 +204,11 @@ void VulkanRenderer::Init(VkData* vulkan_data) {
         LOG("|~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~|");
         LOG("|>                                   <|");
         LOG("|~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~|");
-        
+
         vulkan_data->instance.layers = std::move(layers);
     }
-    
-    
+
+
     LOG("Instance Info");
     vulkan_data->instance.info = {
         .sType                   = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
@@ -222,16 +220,16 @@ void VulkanRenderer::Init(VkData* vulkan_data) {
         .enabledExtensionCount   = VecGetSizeU32(vulkan_data->instance.extensions),
         .ppEnabledExtensionNames = VecGetData(vulkan_data->instance.extensions),
     };
-    
-    
+
+
     LOG("Instance Creation");
     VkResult result = vkCreateInstance(
         &vulkan_data->instance.info,
         vulkan_data->allocator,
         &vulkan_data->instance.self
     );
-    VK_PANIC_CTX("vkCreateInstance");  
-    
+    VK_PANIC_CTX("vkCreateInstance");
+
     LOG("Debug Messenger");
     IFDEBUG {
         auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(
@@ -246,29 +244,29 @@ void VulkanRenderer::Init(VkData* vulkan_data) {
         );
         VK_PANIC_CTX("vkCreateDebugUtilsMessengerEXT");
     }
-    
-    
+
+
     LOG("Creating Surface");
     window->CreateSurface(vulkan_data);
-    
+
     LOG("Choosing Physical Device");
     ChoosePhysicalDevice(vulkan_data);
-    
+
     LOG("Creating Logical Device");
     CreateLogicalDevice(vulkan_data);
-    
+
     LOG("Creating Logical Device Queues");
     CreateQueues(vulkan_data);
-    
+
     LOG("Choosing Present Mode");
     ChoosePresentMode(vulkan_data);
-    
+
     LOG("Choosing Extent");
     ChooseExtent(vulkan_data);
-    
+
     LOG("Choosing Surface Format");
     ChooseSurfaceFormat(vulkan_data);
-    
+
     LOGF(
         "Present Mode:\t%s\n",
         string_VkPresentModeKHR(vulkan_data->swapchain.presentMode)
@@ -280,20 +278,20 @@ void VulkanRenderer::Init(VkData* vulkan_data) {
     );
     LOGF(
         "Chosen Format: %s @ %s\n",
-         string_VkFormat(vulkan_data->swapchain.surfaceFormat.format),
-         string_VkColorSpaceKHR(vulkan_data->swapchain.surfaceFormat.colorSpace)
+        string_VkFormat(vulkan_data->swapchain.surfaceFormat.format),
+        string_VkColorSpaceKHR(vulkan_data->swapchain.surfaceFormat.colorSpace)
     );
-    
+
     LOG("Creating Swapchain");
     CreateSwapchain(vulkan_data);
-    
+
     LOG("VulkanRenderer::Init() done");
 }
 
 void VulkanRenderer::ChoosePhysicalDevice(VkData* vulkan_data) {
     u32 pDevicesCount = 0;
     vector<VkPhysicalDevice> pDevices = {};
-    
+
     vkEnumeratePhysicalDevices(
         vulkan_data->instance.self,
         &pDevicesCount,
@@ -303,31 +301,31 @@ void VulkanRenderer::ChoosePhysicalDevice(VkData* vulkan_data) {
         LOG("VulkanRenderer::ChoosePhysicalDevice() no physical devices found");
         RUNTIME_ERROR("No physical devices found");
     }
-    
+
     pDevices.resize(pDevicesCount);
     vkEnumeratePhysicalDevices(
         vulkan_data->instance.self,
         &pDevicesCount,
         VEC_DATA(pDevices)
     );
-    
+
     map<VkPhysicalDevice, u32>                    scores  = {};
     map<VkPhysicalDevice, VkData::PhysicalDevice> dataMap = {};
-    
+
     int i = 0;
     for(auto& pDevice : pDevices) {
         scores[pDevice]  = 0;
         dataMap[pDevice] = {};
-        
+
         auto& score = scores[pDevice];
         auto& data  = dataMap[pDevice];
-        
+
         VkPhysicalDeviceProperties pDeviceProperties = {};
         vkGetPhysicalDeviceProperties(pDevice, &pDeviceProperties);
-        
+
         VkPhysicalDeviceMemoryProperties pDeviceMemoryProperties = {};
         vkGetPhysicalDeviceMemoryProperties(pDevice, &pDeviceMemoryProperties);
-        
+
         VkPhysicalDeviceFeatures2 pDeviceFeatures = {
             .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
             .pNext = (void*)&VkData::PhysicalDevice::requestedDynamicRenderingFeatures,
@@ -335,13 +333,13 @@ void VulkanRenderer::ChoosePhysicalDevice(VkData* vulkan_data) {
         };
 
         vkGetPhysicalDeviceFeatures2(pDevice, &pDeviceFeatures);
-        
+
         VkSurfaceCapabilities2KHR pSurfaceCapabilities = {
             .sType = VK_STRUCTURE_TYPE_SURFACE_CAPABILITIES_2_KHR,
             .pNext = nil,
             .surfaceCapabilities = {}
         };
-    
+
         VkPhysicalDeviceSurfaceInfo2KHR pSurfaceInfo = {
             .sType   = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SURFACE_INFO_2_KHR,
             .pNext   = nil,
@@ -358,19 +356,19 @@ void VulkanRenderer::ChoosePhysicalDevice(VkData* vulkan_data) {
         auto& props    = pDeviceProperties;
         auto& memProps = pDeviceMemoryProperties;
         auto& limits   = props.limits;
-        
+
         auto maxImageDimension2D = limits.maxImageDimension2D;
         LOGF("maxImageDimension2D: %d\n", maxImageDimension2D);
         score += maxImageDimension2D;
-        
+
         auto maxImageDimension3D = limits.maxImageDimension3D;
         LOGF("maxImageDimension3D: %d\n", maxImageDimension3D);
         score += maxImageDimension3D;
-        
+
         auto maxPushConstantsSize = limits.maxPushConstantsSize;
         LOGF("maxPushConstantsSize: %d\n", maxPushConstantsSize);
         score += maxPushConstantsSize;
-        
+
         if(feature.samplerAnisotropy) {
             LOG("Supports: samplerAnisotropy");
             score += 10;
@@ -378,7 +376,7 @@ void VulkanRenderer::ChoosePhysicalDevice(VkData* vulkan_data) {
             LOG("Doesn't support: samplerAnisotropy");
             score -= 10;
         }
-        
+
         if(feature.tessellationShader) {
             LOG("Supports: tessellationShader");
             score += 10;
@@ -386,29 +384,29 @@ void VulkanRenderer::ChoosePhysicalDevice(VkData* vulkan_data) {
             LOG("Doesn't support: tessellationShader");
             score -= 10;
         }
-        
+
         vector<VkQueueFamilyProperties> queueFamilyProperties = {};
         u32 queueFamilyCount = 0;
-        
+
         vkGetPhysicalDeviceQueueFamilyProperties(
             pDevice,
             &queueFamilyCount,
             nil
         );
         queueFamilyProperties.resize(queueFamilyCount);
-        
+
         vkGetPhysicalDeviceQueueFamilyProperties(
             pDevice,
             &queueFamilyCount,
             VEC_DATA(queueFamilyProperties)
         );
-        
+
         VkData::PhysicalDevice::Queues& queue = dataMap[pDevice].queues;
         u32             qfi   = 0;
         for(VkQueueFamilyProperties& qF : queueFamilyProperties) {
             auto& flags   = qF.queueFlags;
             bool  flagged = false;
-            
+
             if((flags & VK_QUEUE_GRAPHICS_BIT) == VK_QUEUE_GRAPHICS_BIT && !queue.hasGraphicsFamily) {
                 LOGF("\t#%d - %s\n", qfi, "Graphics");
                 queue.hasGraphicsFamily = true;
@@ -416,7 +414,7 @@ void VulkanRenderer::ChoosePhysicalDevice(VkData* vulkan_data) {
                 queue.indices.push_back(qfi);
                 flagged = true;
             }
-            
+
             if((flags & VK_QUEUE_COMPUTE_BIT) == VK_QUEUE_COMPUTE_BIT) {
                 LOGF("\t#%d - %s\n", qfi, "Compute");
                 queue.hasComputeFamily = true;
@@ -424,7 +422,7 @@ void VulkanRenderer::ChoosePhysicalDevice(VkData* vulkan_data) {
                 queue.indices.push_back(qfi);
                 flagged = true;
             }
-            
+
             if((flags & VK_QUEUE_TRANSFER_BIT) == VK_QUEUE_TRANSFER_BIT) {
                 LOGF("\t#%d - %s\n", qfi, "Transfer");
                 queue.hasTransferFamily = true;
@@ -432,7 +430,7 @@ void VulkanRenderer::ChoosePhysicalDevice(VkData* vulkan_data) {
                 queue.indices.push_back(qfi);
                 flagged = true;
             }
-            
+
             VkBool32 supportPresent = false;
             vkGetPhysicalDeviceSurfaceSupportKHR(
                 pDevice,
@@ -447,9 +445,9 @@ void VulkanRenderer::ChoosePhysicalDevice(VkData* vulkan_data) {
                 queue.indices.push_back(qfi);
                 flagged = true;
             }
-            
+
             if(flagged) queue.indices.push_back(qfi);
-            
+
             qfi++;
         }
         LOG("Final Queues: ");
@@ -457,35 +455,35 @@ void VulkanRenderer::ChoosePhysicalDevice(VkData* vulkan_data) {
         LOGF( "\t Present Family:\t%d\n", queue.presentFamily);
         LOGF( "\t Compute Family:\t%d\n", queue.computeFamily);
         LOGF("\t Transfer Family:\t%d\n", queue.transferFamily);
-        
+
         switch(props.deviceType) {
-            case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:
-                LOG("Device Type: DiscreteGpu");
-                score += 1000;
-                break;
-            case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU:
-                LOG("Device Type: IntegratedGpu");
-                score += 750;
-                break;
-            case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU:
-                LOG("Device Type: VirtualGpu");
-                score += 500;
-                break;
-            case VK_PHYSICAL_DEVICE_TYPE_CPU:
-                LOG("Device Type: Cpu");
-                score += 250;
-                break;
-            case VK_PHYSICAL_DEVICE_TYPE_OTHER:
-                LOG("Device Type: Other");
-                score += 100;
-                break;
-            default:
-                LOG("Device Type: Unknown");
-                score -= 10;
-                break;
+        case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:
+            LOG("Device Type: DiscreteGpu");
+            score += 1000;
+            break;
+        case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU:
+            LOG("Device Type: IntegratedGpu");
+            score += 750;
+            break;
+        case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU:
+            LOG("Device Type: VirtualGpu");
+            score += 500;
+            break;
+        case VK_PHYSICAL_DEVICE_TYPE_CPU:
+            LOG("Device Type: Cpu");
+            score += 250;
+            break;
+        case VK_PHYSICAL_DEVICE_TYPE_OTHER:
+            LOG("Device Type: Other");
+            score += 100;
+            break;
+        default:
+            LOG("Device Type: Unknown");
+            score -= 10;
+            break;
         }
         score += pDevicesCount - i;
-        
+
         dataMap[pDevice].capabilities     = pSurfaceCapabilities.surfaceCapabilities;
         dataMap[pDevice].features         = pDeviceFeatures;
         dataMap[pDevice].properties       = pDeviceProperties;
@@ -496,7 +494,7 @@ void VulkanRenderer::ChoosePhysicalDevice(VkData* vulkan_data) {
         LOGF("Score: %d\n\n", score);
         i++;
     }
-    
+
     int bestScore                     = 0;
     VkData::PhysicalDevice bestDevice = {};
     for (auto& [device, score] : scores) {
@@ -511,18 +509,18 @@ void VulkanRenderer::ChoosePhysicalDevice(VkData* vulkan_data) {
     }
     vulkan_data->pDevice = std::move(bestDevice);
     LOGF("Best Device: %s\t With Score: %d\n", vulkan_data->pDevice.properties.deviceName, bestScore);
-    
+
     LOG("VulkanRenderer::ChoosePhysicalDevice() done");
 }
 
 
 void VulkanRenderer::CreateLogicalDevice(VkData* vulkan_data) {
     LOG("VulkanRenderer::CreateLogicalDevice()");
-    
-    LOG("Logical Device QueueInfos"); 
+
+    LOG("Logical Device QueueInfos");
     auto& queueCreateInfos = vulkan_data->lDevice.queueCreateInfos;
     float queuePriority = 1.0f;
-    
+
     vector<u32> queues = {
         vulkan_data->pDevice.queues.graphicsFamily,
         vulkan_data->pDevice.queues.presentFamily,
@@ -538,12 +536,12 @@ void VulkanRenderer::CreateLogicalDevice(VkData* vulkan_data) {
         };
         queueCreateInfos.push_back(queueCreateInfo);
     }
-    
+
     LOG("Device Extensions");
-    
+
     vector<VkExtensionProperties> availableExtensionProperties = {};
     u32 availableExtensionCount   = 0;
-    
+
     vkEnumerateDeviceExtensionProperties(
         vulkan_data->pDevice.self,
         nil,
@@ -554,7 +552,7 @@ void VulkanRenderer::CreateLogicalDevice(VkData* vulkan_data) {
         LOG("VulkanRenderer::CreateLogicalDevice() no available extensions found");
         RUNTIME_ERROR("No available extensions found");
     }
-    
+
     availableExtensionProperties.resize(availableExtensionCount);
     vkEnumerateDeviceExtensionProperties(
         vulkan_data->pDevice.self,
@@ -562,15 +560,15 @@ void VulkanRenderer::CreateLogicalDevice(VkData* vulkan_data) {
         &availableExtensionCount,
         VEC_DATA(availableExtensionProperties)
     );
-    
-    
+
+
     // Requested extensions
     vector<cstr> requestedDeviceExtensions = {
         VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-        VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME 
+        VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME
     };
-    
-    
+
+
     // Pretty print
     LOGF("\tNumber of available extensions: %d\n", VEC_SIZE(availableExtensionProperties));
     LOG("|~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~|");
@@ -582,8 +580,8 @@ void VulkanRenderer::CreateLogicalDevice(VkData* vulkan_data) {
     LOG("|~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~|");
     LOG("|>                               <|");
     LOG("|~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~|");
-    
-    
+
+
     LOGF("\n\tNumber of requested extensions: %d\n", VEC_SIZE(requestedDeviceExtensions));
     LOG("|~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~|");
     LOG("|>| Requested Device Extensions |<|");
@@ -594,8 +592,8 @@ void VulkanRenderer::CreateLogicalDevice(VkData* vulkan_data) {
     LOG("|~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~|");
     LOG("|>                               <|");
     LOG("|~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~|");
-    
-    
+
+
     vector<cstr> failedExtensions = requestedDeviceExtensions;
     for(auto& ext : availableExtensionProperties) {
         for(auto it = failedExtensions.begin(); it != failedExtensions.end();) {
@@ -605,7 +603,7 @@ void VulkanRenderer::CreateLogicalDevice(VkData* vulkan_data) {
                 ++it;
             }
         }
-    } 
+    }
     LOGF("\n\tNumber of failed extensions: %d\n", VEC_SIZE(failedExtensions));
     LOG("|~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~|");
     LOG("|> | Failed Device Extensions |  <|");
@@ -621,8 +619,8 @@ void VulkanRenderer::CreateLogicalDevice(VkData* vulkan_data) {
         RUNTIME_ERROR("Failed to create logical device");
     }
     vulkan_data->lDevice.extensions = std::move(requestedDeviceExtensions);
-    
-    
+
+
     LOG("Logical Device Info");
     vulkan_data->lDevice.createInfo = {
         .sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
@@ -638,62 +636,62 @@ void VulkanRenderer::CreateLogicalDevice(VkData* vulkan_data) {
         .ppEnabledExtensionNames = VEC_DATA(vulkan_data->lDevice.extensions),
         .pEnabledFeatures        = &vulkan_data->pDevice.requestedFeatures,
     };
-    
+
     LOG("Logical Device Creation");
-    
+
     VkResult result = vkCreateDevice(
-        vulkan_data->pDevice.self,
-        &vulkan_data->lDevice.createInfo,
-        vulkan_data->allocator,
-        &vulkan_data->lDevice.self
-    );
+                          vulkan_data->pDevice.self,
+                          &vulkan_data->lDevice.createInfo,
+                          vulkan_data->allocator,
+                          &vulkan_data->lDevice.self
+                      );
     VK_PANIC_CTX("vkCreateDevice");
-    
+
     LOG("VulkanRenderer::CreateLogicalDevice() done");
 }
 
 
 void VulkanRenderer::CreateQueues(VkData* vulkan_data) {
     LOG("VulkanRenderer::CreateQueues()");
-    
+
     vkGetDeviceQueue(
         vulkan_data->lDevice.self,
         vulkan_data->pDevice.queues.graphicsFamily,
         0,
         &vulkan_data->lDevice.queues.graphicsFamily
     );
-    
+
     vkGetDeviceQueue(
         vulkan_data->lDevice.self,
         vulkan_data->pDevice.queues.presentFamily,
         0,
         &vulkan_data->lDevice.queues.presentFamily
     );
-    
+
     vkGetDeviceQueue(
         vulkan_data->lDevice.self,
         vulkan_data->pDevice.queues.computeFamily,
         0,
         &vulkan_data->lDevice.queues.computeFamily
     );
-    
+
     vkGetDeviceQueue(
         vulkan_data->lDevice.self,
         vulkan_data->pDevice.queues.transferFamily,
         0,
         &vulkan_data->lDevice.queues.transferFamily
     );
-    
+
     LOG("VulkanRenderer::CreateQueues() done");
 }
 
 
 void VulkanRenderer::ChoosePresentMode(VkData* vulkan_data) {
     VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
-    
+
     vector<VkPresentModeKHR> presentModes = {};
     u32 presentModeCount               = 0;
-    
+
     vkGetPhysicalDeviceSurfacePresentModesKHR(
         vulkan_data->pDevice.self,
         vulkan_data->surface,
@@ -704,7 +702,7 @@ void VulkanRenderer::ChoosePresentMode(VkData* vulkan_data) {
         LOG("VulkanRenderer::ChoosePresentMode() no present modes found");
         RUNTIME_ERROR("No present modes found");
     }
-    
+
     presentModes.resize(presentModeCount);
     vkGetPhysicalDeviceSurfacePresentModesKHR(
         vulkan_data->pDevice.self,
@@ -712,15 +710,15 @@ void VulkanRenderer::ChoosePresentMode(VkData* vulkan_data) {
         &presentModeCount,
         VEC_DATA(presentModes)
     );
-    
+
     vector<VkPresentModeKHR> preferredPresentModes = {
         VK_PRESENT_MODE_FIFO_RELAXED_KHR, // Best
-        VK_PRESENT_MODE_FIFO_KHR, 
+        VK_PRESENT_MODE_FIFO_KHR,
         VK_PRESENT_MODE_IMMEDIATE_KHR,
         VK_PRESENT_MODE_MAILBOX_KHR,
         VK_PRESENT_MODE_SHARED_CONTINUOUS_REFRESH_KHR, // Worst
     };
-    
+
     // Pretty print
     LOGF("\tAvailable Present Modes: %d\n", u32(presentModes.size()));
     LOG("|~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~|");
@@ -732,7 +730,7 @@ void VulkanRenderer::ChoosePresentMode(VkData* vulkan_data) {
     LOG("|~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~|");
     LOG("|>                                           <|");
     LOG("|~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~|");
-    
+
     LOGF("\n\tPreferred Present Modes: %d\n", u32(preferredPresentModes.size()));
     LOG("|~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~|");
     LOG("|>        | Preferred Present Modes |        <|");
@@ -743,7 +741,7 @@ void VulkanRenderer::ChoosePresentMode(VkData* vulkan_data) {
     LOG("|~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~|");
     LOG("|>                                           <|");
     LOG("|~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~-*-~|");
-    
+
     map<VkPresentModeKHR, u32> presentModeScores = {};
     for(u32 i = 0; i < presentModeCount; i++) {
         for(u32 j = 0; j < preferredPresentModes.size(); j++) {
@@ -753,7 +751,7 @@ void VulkanRenderer::ChoosePresentMode(VkData* vulkan_data) {
             }
         }
     }
-    
+
     u32 bestScore = l<u32>::max();
     for (auto& [mode, score] : presentModeScores) {
         if (score < bestScore) {
@@ -770,19 +768,19 @@ void VulkanRenderer::ChooseExtent(VkData* vulkan_data) {
         vulkan_data->swapchain.extent = vulkan_data->pDevice.capabilities.currentExtent;
     } else {
         VkExtent2D actualExtent = { 0, 0 };
-        
+
         int width  = 0;
         int height = 0;
         window->GetExtent(&width, &height);
-        
+
         if(width == 0 || height == 0) {
             LOG("Window size is 0, using fallback - window size");
             window->GetSize(&width, &height);
         }
-        
+
         actualExtent.width  = static_cast<u32>(width);
         actualExtent.height = static_cast<u32>(height);
-        
+
         vulkan_data->swapchain.extent = actualExtent;
     }
 }
@@ -803,7 +801,7 @@ void VulkanRenderer::ChooseSurfaceFormat(VkData* vulkan_data) {
 
     vector<VkSurfaceFormatKHR> surfaceFormats = {};
     u32 surfaceFormatCount = 0;
-    
+
     vkGetPhysicalDeviceSurfaceFormatsKHR(
         vulkan_data->pDevice.self,
         vulkan_data->surface,
@@ -814,7 +812,7 @@ void VulkanRenderer::ChooseSurfaceFormat(VkData* vulkan_data) {
         LOG("VulkanRenderer::ChooseSurfaceFormat() no surface formats found");
         RUNTIME_ERROR("No surface formats found");
     }
-    
+
     surfaceFormats.resize(surfaceFormatCount);
     vkGetPhysicalDeviceSurfaceFormatsKHR(
         vulkan_data->pDevice.self,
@@ -879,7 +877,7 @@ void VulkanRenderer::ChooseSurfaceFormat(VkData* vulkan_data) {
     for(u32 i = 0; i < surfaceFormatCount; i++) {
         for(u32 j = 0; j < preferredSurfaceFormatsLength; j++) {
             if(surfaceFormats[i] == preferredSurfaceFormats[j]) {
-                surfaceFormatScores[surfaceFormats[i]] = preferredSurfaceFormatsLength - 1 - j; 
+                surfaceFormatScores[surfaceFormats[i]] = preferredSurfaceFormatsLength - 1 - j;
                 break;
             }
         }
@@ -908,7 +906,7 @@ void VulkanRenderer::CreateSwapchain(VkData* vulkan_data) {
     swap.imageCount = caps.minImageCount + 1;
     if(swap.imageCount > caps.maxImageCount) {
         swap.imageCount = caps.maxImageCount;
-    } 
+    }
     if(swap.imageCount == 0) {
         LOG("VulkanRenderer::CreateSwapchain() no image count found");
         RUNTIME_ERROR("No image count found");
@@ -934,7 +932,7 @@ void VulkanRenderer::CreateSwapchain(VkData* vulkan_data) {
         .clipped               = true,
         .oldSwapchain          = nil,
     };
-    
+
     vector<u32> indices = {
         vulkan_data->pDevice.queues.graphicsFamily,
         vulkan_data->pDevice.queues.presentFamily,
@@ -964,7 +962,7 @@ void VulkanRenderer::CreateSwapchain(VkData* vulkan_data) {
 void VulkanRenderer::CreateResources(VkData* vulkan_data) {
     LOG("VulkanRenderer::CreateResources()");
 
-
+    
 
     LOG("VulkanRenderer::CreateResources() done");
 }
@@ -972,6 +970,6 @@ void VulkanRenderer::CreateResources(VkData* vulkan_data) {
 
 void VulkanRenderer::Clean(VkData* vulkan_data) {
     LOG("VulkanRenderer::Clean()");
-    
+
     LOG("VulkanRenderer::Clean() done");
 }
