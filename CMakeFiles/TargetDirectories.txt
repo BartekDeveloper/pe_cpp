@@ -1,0 +1,12 @@
+/home/zota/projects/multi/pe_cpp/CMakeFiles/pe.dir
+/home/zota/projects/multi/pe_cpp/CMakeFiles/interfaces.dir
+/home/zota/projects/multi/pe_cpp/CMakeFiles/clean_interfaces.dir
+/home/zota/projects/multi/pe_cpp/CMakeFiles/docs.dir
+/home/zota/projects/multi/pe_cpp/CMakeFiles/copyright.dir
+/home/zota/projects/multi/pe_cpp/CMakeFiles/clean_copyright.dir
+/home/zota/projects/multi/pe_cpp/CMakeFiles/run.dir
+/home/zota/projects/multi/pe_cpp/CMakeFiles/release_run.dir
+/home/zota/projects/multi/pe_cpp/CMakeFiles/gdb.dir
+/home/zota/projects/multi/pe_cpp/CMakeFiles/help_me.dir
+/home/zota/projects/multi/pe_cpp/CMakeFiles/edit_cache.dir
+/home/zota/projects/multi/pe_cpp/CMakeFiles/rebuild_cache.dir

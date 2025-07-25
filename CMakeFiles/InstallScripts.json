@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/zota/projects/multi/pe_cpp/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

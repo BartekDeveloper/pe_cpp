@@ -1,0 +1,1 @@
+/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/pe.dir/link.d CMakeFiles/pe.dir/src/engine/create/image.cpp.o CMakeFiles/pe.dir/src/engine/engine.cpp.o CMakeFiles/pe.dir/main.cpp.o -o pe  -lSDL3 -lvulkan
