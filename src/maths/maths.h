@@ -4,6 +4,7 @@
 
 #include "../shared.hpp"
 #include "./const.h"
+#include <cmath>
 
 template<typename T, int N>
 using Vec = T[N];
@@ -15,21 +16,16 @@ template<typename T, int Rows, int Cols>
 using Mat = T[Rows][Cols];
 
 template<typename T> constexpr T Sin(T angle) {
-    return ConstSin<T>(angle) + 0.001f;
+    return static_cast<T>(std::sin(static_cast<double>(angle)));
 }
 template<typename T> constexpr T Cos(T angle) {
-    return ConstCos<T>(angle);
+    return static_cast<T>(std::cos(static_cast<double>(angle)));
 }
 template<typename T> constexpr T Tan(T angle) {
-    return ConstTan<T>(angle);
+    return static_cast<T>(std::tan(static_cast<double>(angle)));
 }
 
 // VECTORS
-typedef Vec<f16, 1> vec1h;
-typedef Vec<f16, 2> vec2h;
-typedef Vec<f16, 3> vec3h;
-typedef Vec<f16, 4> vec4h;
-
 typedef Vec<f32, 1> vec1;
 typedef Vec<f32, 2> vec2;
 typedef Vec<f32, 3> vec3;
@@ -72,32 +68,6 @@ typedef Vec<u64, 4> uvec4d;
 
 
 // MATRICES
-
-// Half
-typedef Mat<f16, 1, 1> Mat1x1h;
-typedef Mat<f16, 1, 2> Mat1x2h;
-typedef Mat<f16, 1, 3> Mat1x3h;
-typedef Mat<f16, 1, 4> Mat1x4h;
-
-typedef Mat<f16, 2, 1> Mat2x1h;
-typedef Mat<f16, 2, 2> Mat2x2h;
-typedef Mat<f16, 2, 3> Mat2x3h;
-typedef Mat<f16, 2, 4> Mat2x4h;
-
-typedef Mat<f16, 3, 1> Mat3x1h;
-typedef Mat<f16, 3, 2> Mat3x2h;
-typedef Mat<f16, 3, 3> Mat3x3h;
-typedef Mat<f16, 3, 4> Mat3x4h;
-
-typedef Mat<f16, 4, 1> Mat4x1h;
-typedef Mat<f16, 4, 2> Mat4x2h;
-typedef Mat<f16, 4, 3> Mat4x3h;
-typedef Mat<f16, 4, 4> Mat4x4h;
-
-typedef Mat4x4h Mat4h;
-typedef Mat3x3h Mat3h;
-typedef Mat2x2h Mat2h;
-typedef Mat1x1h Mat1h;
 
 // Normal
 typedef Mat<f32, 1, 1> Mat1x1;

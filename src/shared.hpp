@@ -116,12 +116,6 @@ typedef int16_t i16;
 typedef int32_t i32;
 typedef int64_t i64;
 
-// #ifdef __fp16
-// typedef __fp16 f16;
-// #else
-// #warning "No __fp16 defined - defaulting to float"
-// typedef float f16;
-// #endif
 typedef float  f16;
 typedef float  f32;
 typedef double f64;

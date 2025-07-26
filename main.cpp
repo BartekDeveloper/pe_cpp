@@ -5,6 +5,8 @@ int main() {
     
     try {
         Global::Init();
+        Global::Run();
+        Global::Clean();
     } catch(const std::exception& e) {
         ERROR(e.what());
     }

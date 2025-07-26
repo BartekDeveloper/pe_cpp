@@ -2,10 +2,14 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "MyCmake: Build",
             "type": "shell",
-            "label": "Make: build",
-            "command": "make run . -j$(nproc)",
-            "args": [],
+            "command": "cmake --build out", 
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            
         }
     ]
 }

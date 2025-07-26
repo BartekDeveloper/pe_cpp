@@ -15,8 +15,8 @@ namespace Global {
     };
     
     struct VkData {
-        VkAllocationCallbacks* allocator = null;
-        VkApplicationInfo     appInfo    = {};
+        VkAllocationCallbacks allocator = {};
+        VkApplicationInfo     appInfo   = {};
         
         struct DebugMessenger {
             VkDebugUtilsMessengerCreateInfoEXT info = {};
@@ -32,7 +32,7 @@ namespace Global {
         } instance;
         
         VkSurfaceKHR surface = null;
-                
+        
         struct PhysicalDevice {
             constexpr const static VkPhysicalDeviceFeatures requestedFeatures = {
                 .samplerAnisotropy = true,
@@ -40,22 +40,21 @@ namespace Global {
             constexpr const static VkPhysicalDeviceDynamicRenderingFeatures requestedDynamicRenderingFeatures = {
                 .dynamicRendering = true,
             };
-
             
             struct Queues {                
                 bool hasGraphicsFamily = false;
                 bool hasPresentFamily  = false;
                 bool hasComputeFamily  = false;
                 bool hasTransferFamily = false;
-
+                
                 u32  graphicsFamily    = 0;
                 u32  presentFamily     = 0;
                 u32  computeFamily     = 0;
                 u32  transferFamily    = 0;
-
+                
                 vector<u32> indices       = {};
             } queues = {};
-
+            
             VkPhysicalDeviceFeatures2        features         = {};
             VkPhysicalDeviceProperties       properties       = {};
             VkPhysicalDeviceMemoryProperties memoryProperties = {};
@@ -78,26 +77,26 @@ namespace Global {
             
             VkDevice                     self             = null;
         } lDevice;
-
+        
         struct SwapChain {
             VkPresentModeKHR   presentMode   = VK_PRESENT_MODE_FIFO_KHR;
             VkExtent2D         extent        = {};
             VkSurfaceFormatKHR surfaceFormat = {};
             
             u32 imageCount = 0;
-
+            
             VkSwapchainCreateInfoKHR info    = {};
             VkSwapchainKHR self = null;
         } swapchain;
         
     };
-
+    
     struct GBuffer {
         VkImage        image;
         VkImageView    view;
         VkDeviceMemory memory;
     };
-
+    
     enum class MSAA {
         OFF,
         X2,
@@ -106,7 +105,7 @@ namespace Global {
         X16,
         X32
     };
-
+    
     struct GBufferProperties {
         VkImageUsageFlags usage         = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
         VkFormat          format        = VK_FORMAT_R8G8B8A8_UNORM; 
@@ -114,81 +113,85 @@ namespace Global {
         u32               mipLevels     = 1;
         u32               baseLevel     = 1;
         u32               arrayLayers   = 1;
-
+        
         // Flags
         MSAA              multisampling = MSAA::OFF;
     };
     
     class VulkanRenderer {
         public:
-            VulkanRenderer() = default;
-            ~VulkanRenderer() = default;
+        VulkanRenderer() = default;
+        ~VulkanRenderer() = default;
         
         public:
-            void Init(VkData* vulkan_data);
-            void Clean(VkData* vulkan_data);
+        void Init(VkData* vulkan_data);
+        void Clean(VkData* vulkan_data);
         
         private:
-            void ChoosePhysicalDevice(VkData* vulkan_data);
-            void CreateLogicalDevice(VkData* vulkan_data);
-            void CreateQueues(VkData* vulkan_data);
-            void ChooseExtent(VkData* vulkan_data);
-            void ChoosePresentMode(VkData* vulkan_data);
-            void ChooseSurfaceFormat(VkData* vulkan_data);
-            void CreateSwapchain(VkData* vulkan_data);
-            void CreateResources(VkData* vulkan_data);
+        void ChoosePhysicalDevice(VkData* vulkan_data);
+        void CreateLogicalDevice(VkData* vulkan_data);
+        void CreateQueues(VkData* vulkan_data);
+        void ChooseExtent(VkData* vulkan_data);
+        void ChoosePresentMode(VkData* vulkan_data);
+        void ChooseSurfaceFormat(VkData* vulkan_data);
+        void CreateSwapchain(VkData* vulkan_data);
+        void CreateResources(VkData* vulkan_data);
         
         private:
-            void CreateGBuffer(
-                const VkData*            vulkan_data,
-                GBuffer*                 gBuffer,
-                const GBufferProperties& gBufferProperties
-            );
-
-        private:
-            void DestroySwapchain(VkData* vulkan_data);
-            void DestroyQueues(VkData* vulkan_data);
-            void DestroyLogicalDevice(VkData* vulkan_data);
-            void DestroyInstance(VkData* vulkan_data);
+        void CreateGBuffer(
+            const VkData*            vulkan_data,
+            GBuffer*                 gBuffer,
+            const GBufferProperties& gBufferProperties
+        );
         
         private:
-            VkData data{};
+        void DestroySwapchain(VkData* vulkan_data);
+        void DestroyQueues(VkData* vulkan_data);
+        void DestroyLogicalDevice(VkData* vulkan_data);
+        void DestroyInstance(VkData* vulkan_data);
+        
+        private:
+        VkData data{};
     };
     
     class Window {
         public:
-            Window();
-            ~Window();
-            
-            enum class WindowType {
-                Windowed   = 0,
-                Fullscreen = 1,
-                Borderless = 2,
-            };
-            
-            enum class Resizable {
-                Locked   = 0,
-                Unlocked = 1,
-            };
+        Window();
+        ~Window();
+        
+        enum class WindowType {
+            Windowed   = 0,
+            Fullscreen = 1,
+            Borderless = 2,
+        };
+        
+        enum class Resizable {
+            Locked   = 0,
+            Unlocked = 1,
+        };
         
         public:
-            void     Create();
-            void     Destroy();
-            void     DestroySurface(VkData* vulkan_data);
-            void     GetExtent(int* width, int* height);
-            void     GetSize(int* width, int* height);
-            VkResult CreateSurface(VkData* vulkan_data);
+        void     Create();
+        void     Destroy();
+        void     GetExtent(int* width, int* height);
+        void     GetSize(int* width, int* height);
+        void     PollEvents();
+        void     DestroySurface(VkData* vulkan_data);
+        VkResult CreateSurface(VkData* vulkan_data);
+        bool     IsRunning() const { return this->running; } 
 
         private:
-            SDL_Window* ptr        = nil;
-            u32         width      = 1280;
-            u32         height     = 720;
-            cstr        title      = "PE";
-            WindowType  fullscreen = WindowType::Windowed;
-            Resizable   resizable  = Resizable::Locked;
+        SDL_Window* ptr        = nil;
+        u32         width      = 1280;
+        u32         height     = 720;
+        cstr        title      = "PE";
+        WindowType  fullscreen = WindowType::Windowed;
+        Resizable   resizable  = Resizable::Locked;
+        bool        running    = true;
     };
     
     void Init();
+    void Run();
     void NextFrame(RenderData* rData);
     void Clean();
     

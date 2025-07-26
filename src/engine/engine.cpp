@@ -9,7 +9,7 @@ RenderData rData;
 VkData     vkData{};
 
 void Global::Init() {
-    LOG("Engine::Init()");
+    LOG("Global::Init()");
 
     LOG("Creating Window");
     window = make_unique<Window>();
@@ -19,18 +19,26 @@ void Global::Init() {
     renderer = make_unique<VulkanRenderer>();
     renderer->Init(&vkData);
 
-    LOG("Engine::Init() done");
+    LOG("Global::Init() done");
+}
+
+void Global::Run() {
+    LOG("Global::Run()");
+
+    while(window->IsRunning()) {
+        window->PollEvents();
+    }
+
+    LOG("Global::Run() done");
 }
 
 void Global::NextFrame(RenderData* rData) {
-    // ...
-
     rData->currentFrame++;
     rData-> currentFrame %= RenderData::MAX_FRAMES_IN_FLIGHT;
 }
 
 void Global::Clean() {
-    LOG("Engine::Clean()");
+    LOG("Global::Clean()");
 
     LOG("Destroying Window");
     window->Destroy();
@@ -38,7 +46,7 @@ void Global::Clean() {
     LOG("Destroying Vulkan Renderer");
     renderer->Clean(&vkData);
 
-    LOG("Engine::Clean() done");
+    LOG("Global::Clean() done");
 }
 
 
@@ -61,11 +69,11 @@ void Window::Create() {
     LOG("Window::Create()");
 
     this->ptr = SDL_CreateWindow(
-                    this->title,
-                    static_cast<int>(this->width),
-                    static_cast<int>(this->height),
-                    SDL_WINDOW_VULKAN
-                );
+        this->title,
+        static_cast<int>(this->width),
+        static_cast<int>(this->height),
+        SDL_WINDOW_VULKAN
+    );
     if(this->ptr == nil) {
         LOGF("SDL_CreateWindow() failed: %s", SDL_GetError());
         RUNTIME_ERROR("SDL_CreateWindow() failed");
@@ -74,20 +82,15 @@ void Window::Create() {
     LOG("Window::Create() done");
 }
 
-VkResult Window::CreateSurface(VkData* vulkan_data) {
-    LOG("Window::CreateSurface()");
-
-    bool ok = SDL_Vulkan_CreateSurface(
-                  this->ptr,
-                  vulkan_data->instance.self,
-                  vulkan_data->allocator,
-                  &vulkan_data->surface
-              );
-    if(!ok) {
-        return VK_ERROR_INITIALIZATION_FAILED;
+void Window::PollEvents() {
+    SDL_Event event;
+    while(SDL_PollEvent(&event)) {
+        switch(event.type) {
+            case SDL_EVENT_QUIT:
+                this->running = false;
+                break;
+        }
     }
-
-    return VK_SUCCESS;
 }
 
 void Window::DestroySurface(VkData* vulkan_data) {
@@ -95,10 +98,26 @@ void Window::DestroySurface(VkData* vulkan_data) {
     SDL_Vulkan_DestroySurface(
         vulkan_data->instance.self,
         vulkan_data->surface,
-        vulkan_data->allocator
+        &vulkan_data->allocator
     );
 
     LOG("Window::DestroySurface() done");
+}
+
+VkResult Window::CreateSurface(VkData* vulkan_data) {
+    LOG("Window::CreateSurface()");
+
+    bool ok = SDL_Vulkan_CreateSurface(
+        this->ptr,
+        vulkan_data->instance.self,
+        &vulkan_data->allocator,
+        &vulkan_data->surface
+    );
+    if(!ok) {
+        return VK_ERROR_INITIALIZATION_FAILED;
+    }
+
+    return VK_SUCCESS;
 }
 
 void Window::Destroy() {
@@ -134,7 +153,7 @@ void VulkanRenderer::Init(VkData* vulkan_data) {
         .sType              = VK_STRUCTURE_TYPE_APPLICATION_INFO,
         .pApplicationName   = "Hello World",
         .applicationVersion = VK_MAKE_VERSION(1, 0, 0),
-        .pEngineName        = "No Engine",
+        .pEngineName        = "No Global",
         .engineVersion      = VK_MAKE_VERSION(1, 0, 0),
         .apiVersion         = VK_API_VERSION_1_3,
     };
@@ -225,7 +244,7 @@ void VulkanRenderer::Init(VkData* vulkan_data) {
     LOG("Instance Creation");
     VkResult result = vkCreateInstance(
         &vulkan_data->instance.info,
-        vulkan_data->allocator,
+        &vulkan_data->allocator,
         &vulkan_data->instance.self
     );
     VK_PANIC_CTX("vkCreateInstance");
@@ -239,7 +258,7 @@ void VulkanRenderer::Init(VkData* vulkan_data) {
         result = func(
             vulkan_data->instance.self,
             &vulkan_data->debugMessenger.info,
-            vulkan_data->allocator,
+            &vulkan_data->allocator,
             &vulkan_data->debugMessenger.self
         );
         VK_PANIC_CTX("vkCreateDebugUtilsMessengerEXT");
@@ -640,11 +659,11 @@ void VulkanRenderer::CreateLogicalDevice(VkData* vulkan_data) {
     LOG("Logical Device Creation");
 
     VkResult result = vkCreateDevice(
-                          vulkan_data->pDevice.self,
-                          &vulkan_data->lDevice.createInfo,
-                          vulkan_data->allocator,
-                          &vulkan_data->lDevice.self
-                      );
+        vulkan_data->pDevice.self,
+        &vulkan_data->lDevice.createInfo,
+        &vulkan_data->allocator,
+        &vulkan_data->lDevice.self
+    );
     VK_PANIC_CTX("vkCreateDevice");
 
     LOG("VulkanRenderer::CreateLogicalDevice() done");
@@ -951,7 +970,7 @@ void VulkanRenderer::CreateSwapchain(VkData* vulkan_data) {
     VkResult result = vkCreateSwapchainKHR(
         vulkan_data->lDevice.self,
         &vulkan_data->swapchain.info,
-        vulkan_data->allocator,
+        &vulkan_data->allocator,
         &vulkan_data->swapchain.self
     );
     VK_PANIC_CTX("vkCreateSwapchainKHR");

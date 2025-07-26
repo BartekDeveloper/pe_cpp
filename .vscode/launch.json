@@ -2,24 +2,16 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "C/C++ Runner: Debug Session",
+            "name": "Launch",
             "type": "cppdbg",
             "request": "launch",
+            "preLaunchTask": "MyCmake: Build",
+            "program": "${workspaceFolder}/out/debug/pe",
             "args": [],
-            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
             "externalConsole": false,
-            "cwd": "/home/zota/projects/multi/pe_cpp",
-            "program": "/home/zota/projects/multi/pe_cpp/out/debug/pe",
-            "MIMode": "gdb",
-            "miDebuggerPath": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ],
-            "preLaunchTask": "Make: build"
+            "internalConsoleOptions": "neverOpen"
         }
+
     ]
 }

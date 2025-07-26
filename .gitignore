@@ -4,3 +4,8 @@ external/include/**
 compiled/**
 interfaces/**
 docs/**
+CMakeFiles
+/out/*.cmake
+/out/Makefile
+/out/*.in
+/out/*.txt
